@@ -1,22 +1,23 @@
-extends Spatial
+@tool
+extends Node3D
 
 enum Axis {
 	X_Plus, Y_Plus, Z_Plus, X_Minus, Y_Minus, Z_Minus
 }
 
-export							var enabled: bool = true
-export (String) 				var bone_name: String
-export (float, 0.1, 100, 0.1) 	var stiffness: float = 1
-export (float, 0, 100, 0.1) 	var damping: float = 0
-export 							var use_gravity: bool = false
-export 							var gravity := Vector3(0, -9.81, 0)
-export (Axis) 					var forward_axis: int = Axis.Z_Minus
-export (NodePath) 				var collision_shape: NodePath setget set_collision_shape
+@export var enabled: bool = true
+@export var bone_name: String
+@export_range(0.1, 100, 0.1) var stiffness: float = 1
+@export_range(0, 100, 0.1) var damping: float = 0
+@export var use_gravity: bool = false
+@export var gravity := Vector3(0, -9.81, 0)
+@export var forward_axis: Axis = Axis.Z_Minus
+@export_node_path var collision_shape: NodePath: set = set_collision_shape
 
-var skeleton: Skeleton
+var skeleton: Skeleton3D
 var bone_id: int
 var bone_id_parent: int
-var collision_sphere: CollisionShape
+var collision_sphere: CollisionShape3D
 var prev_pos: Vector3
 
 
@@ -24,8 +25,7 @@ func set_collision_shape(path:NodePath) -> void:
 	collision_shape = path
 	collision_sphere = get_node_or_null(path)
 	if collision_sphere:
-		assert(collision_sphere is CollisionShape and collision_sphere.shape is SphereShape,
-			"%s: Only SphereShapes are supported for CollisionShapes" % [ name ])
+		assert(collision_sphere is CollisionShape3D and collision_sphere.shape is SphereShape3D, "Only SphereShapes are supported for CollisionShapes")
 
 
 func _ready() -> void:
@@ -33,17 +33,17 @@ func _ready() -> void:
 		set_physics_process(false)
 		return
 
-	set_as_toplevel(true)  # Ignore parent transformation
+	top_level = true  # Ignore parent transformation
 	skeleton = get_parent() # Parent must be a Skeleton node
 	skeleton.clear_bones_global_pose_override()
 	prev_pos = global_transform.origin
 	set_collision_shape(collision_shape)
 
-
-	assert(! (is_nan(translation.x) or is_inf(translation.x)), "%s: Bone translation corrupted" % [ name ])
-	assert(bone_name, "%s: Please enter a bone name" % [ name ])
+	
+	assert(! (is_nan(position.x) or is_inf(position.x)), "Bone translation corrupted")
+	assert(bone_name, "Please enter a bone name")
 	bone_id = skeleton.find_bone(bone_name)
-	assert(bone_id != -1, "%s: Unknown bone %s - Please enter a valid bone name" % [ name, bone_name ])
+	assert(bone_id != -1, "Unknown bone - Please enter a valid bone name")
 	bone_id_parent = skeleton.get_bone_parent(bone_id)
 
 	set_physics_process(true)
@@ -57,17 +57,17 @@ func _physics_process(delta) -> void:
 
 	# See https://godotengine.org/qa/7631/armature-differences-between-bones-custom_pose-transform
 
-	var bone_transf_obj: Transform = skeleton.get_bone_global_pose(bone_id) # Object space bone pose
-	var bone_transf_world: Transform = skeleton.global_transform * bone_transf_obj
+	var bone_transf_obj: Transform3D = skeleton.get_bone_global_pose(bone_id) # Object space bone pose
+	var bone_transf_world: Transform3D = skeleton.global_transform * bone_transf_obj
 
-	var bone_transf_rest_local: Transform = skeleton.get_bone_rest(bone_id)
-	var bone_transf_rest_obj: Transform = skeleton.get_bone_global_pose(bone_id_parent) * bone_transf_rest_local
-	var bone_transf_rest_world: Transform = skeleton.global_transform * bone_transf_rest_obj
+	var bone_transf_rest_local: Transform3D = skeleton.get_bone_rest(bone_id)
+	var bone_transf_rest_obj: Transform3D = skeleton.get_bone_global_pose(bone_id_parent) * bone_transf_rest_local
+	var bone_transf_rest_world: Transform3D = skeleton.global_transform * bone_transf_rest_obj
 
 	############### Integrate velocity (Verlet integration) ##############	
 
 	# If not using gravity, apply force in the direction of the bone (so it always wants to point "forward")
-	var grav: Vector3 = bone_transf_rest_world.basis.xform(Vector3(0, 0, -1)).normalized() * 9.81
+	var grav: Vector3 = (bone_transf_rest_world.basis*Vector3(0, 0, -1)).normalized() * 9.81
 	var vel: Vector3 = (global_transform.origin - prev_pos) / delta
 
 	if use_gravity:
@@ -94,10 +94,9 @@ func _physics_process(delta) -> void:
 
 	############## Rotate the bone to point to this object #############
 
-	var diff_vec_local: Vector3 = bone_transf_world.affine_inverse().xform(global_transform.origin).normalized()
-
+	var diff_vec_local: Vector3 = (bone_transf_world.affine_inverse()*global_transform.origin).normalized()
 	var bone_forward_local: Vector3 = get_bone_forward_local()
-
+	
 	# The axis+angle to rotate on, in local-to-bone space
 	var bone_rotate_axis: Vector3 = bone_forward_local.cross(diff_vec_local)
 	var bone_rotate_angle: float = acos(bone_forward_local.dot(diff_vec_local))
@@ -108,9 +107,9 @@ func _physics_process(delta) -> void:
 	bone_rotate_axis = bone_rotate_axis.normalized()
 
 	# Bring the axis to object space, WITHOUT translation (so only the BASIS is used) since vectors shouldn't be translated
-	var bone_rotate_axis_obj: Vector3 = bone_transf_obj.basis.xform(bone_rotate_axis).normalized()
-	var bone_new_transf_obj: Transform = Transform(bone_transf_obj.basis.rotated(bone_rotate_axis_obj, bone_rotate_angle), bone_transf_obj.origin)
-
+	var bone_rotate_axis_obj: Vector3 = (bone_transf_obj.basis*bone_rotate_axis).normalized()
+	var bone_new_transf_obj: Transform3D = Transform3D(bone_transf_obj.basis.rotated(bone_rotate_axis_obj, bone_rotate_angle), bone_transf_obj.origin)
+	
 	skeleton.set_bone_global_pose_override(bone_id, bone_new_transf_obj, 0.5, true)
 
 	# Orient this object to the jigglebone

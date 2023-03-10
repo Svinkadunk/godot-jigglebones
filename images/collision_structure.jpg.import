@@ -2,16 +2,16 @@
 
 importer="texture"
 type="StreamTexture2D"
-uid="uid://477arfuoti7a"
-path="res://.godot/imported/rig_weight.png-baf3a4fba475dcdd55172800121bdf4c.stex"
+uid="uid://bjft5c3j1o50r"
+path="res://.godot/imported/collision_structure.jpg-8a5584c33f37cd9c1f6c8dedb346a01b.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://images/rig_weight.png"
-dest_files=["res://.godot/imported/rig_weight.png-baf3a4fba475dcdd55172800121bdf4c.stex"]
+source_file="res://images/collision_structure.jpg"
+dest_files=["res://.godot/imported/collision_structure.jpg-8a5584c33f37cd9c1f6c8dedb346a01b.stex"]
 
 [params]
 

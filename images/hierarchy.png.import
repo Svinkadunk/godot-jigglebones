@@ -1,32 +1,35 @@
 [remap]
 
 importer="texture"
-type="StreamTexture"
-path="res://.import/hierarchy.png-96af0d4ff8572b89b57a9d9b9477a21b.stex"
+type="StreamTexture2D"
+uid="uid://cwrn7ak5ev5k4"
+path="res://.godot/imported/hierarchy.png-96af0d4ff8572b89b57a9d9b9477a21b.stex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://images/hierarchy.png"
-source_md5="ba2928881863c08410d51c52fd578834"
-
-dest_files=[ "res://.import/hierarchy.png-96af0d4ff8572b89b57a9d9b9477a21b.stex" ]
-dest_md5="ee6640cbd1dc6c43aa0b9009959a583a"
+dest_files=["res://.godot/imported/hierarchy.png-96af0d4ff8572b89b57a9d9b9477a21b.stex"]
 
 [params]
 
 compress/mode=0
 compress/lossy_quality=0.7
-compress/hdr_mode=0
+compress/hdr_compression=1
+compress/bptc_ldr=0
 compress/normal_map=0
-flags/repeat=0
-flags/filter=true
-flags/mipmaps=false
-flags/anisotropic=false
-flags/srgb=2
+compress/channel_pack=0
+compress/streamed=false
+mipmaps/generate=false
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
 process/fix_alpha_border=true
 process/premult_alpha=false
+process/normal_map_invert_y=false
 process/HDR_as_SRGB=false
-stream=false
-size_limit=0
-detect_3d=true
+process/size_limit=0
+detect_3d/compress_to=1
 svg/scale=1.0

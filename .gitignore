@@ -2,3 +2,4 @@
 .mono/
 export_presets.cfg
 *.blend1
+.godot/
